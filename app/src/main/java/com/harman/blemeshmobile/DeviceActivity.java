@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -68,9 +70,15 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
     Button btn_green;
     Button btn_white;
 
+    SeekBar seekBar_Intensity = null;
+
     final int WRITE_DELAY = 20;
 
     boolean mIsAll = true;
+
+    byte Red = 0x01;
+    byte green = 0x01;
+    byte blue = 0x01;
 
     Messenger mMessenger = new Messenger(new Handler() {
         @Override
@@ -82,6 +90,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                     mSwithAllLightsBtn.setEnabled(true);
                     colorLyt.setVisibility(View.VISIBLE);
                     mControlAll.setVisibility(View.VISIBLE);
+                    seekBar_Intensity.setVisibility(View.VISIBLE);
 
                     break;
 
@@ -91,6 +100,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                     mSwithAllLightsBtn.setEnabled(false);
                     colorLyt.setVisibility(View.GONE);
                     mControlAll.setVisibility(View.GONE);
+                    seekBar_Intensity.setVisibility(View.GONE);
                     break;
 
             }
@@ -130,6 +140,41 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 mIsAll = b;
+            }
+        });
+
+        seekBar_Intensity = findViewById(R.id.sbe_intensity);
+        seekBar_Intensity.setVisibility(View.GONE);
+        seekBar_Intensity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                byte[] data = {
+                        0x00,
+                        0x00,
+                        0x03,
+                        0x01,
+                        0x00,
+                        0x00,
+                        0x00
+
+                };
+                data[5] = (byte) ((i & 0x000000FF) >> 0);
+
+                writeToDevice(data);
+
+
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
 
@@ -228,11 +273,6 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
             mBTGattInst.setCharacteristicNotification(mWriteCharacteristic, true);
 
-            List<BluetoothGattDescriptor> desc = mWriteCharacteristic.getDescriptors();
-            for(BluetoothGattDescriptor curDesc : desc){
-                curDesc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                mBTGattInst.writeDescriptor(curDesc);
-            }
 
 
 
