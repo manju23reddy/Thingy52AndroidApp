@@ -12,6 +12,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.v7.app.AppCompatActivity;
@@ -76,9 +78,30 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
     boolean mIsAll = true;
 
-    byte Red = 0x01;
-    byte green = 0x01;
-    byte blue = 0x01;
+    final int WRITE = 0x10;
+    final int READ  = 0x20;
+
+    HandlerThread mThread;
+    Handler mDeviceHandler;
+
+
+    class DeviceHandler extends Handler{
+        public DeviceHandler(Looper looper){
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case WRITE:
+                    writeToDevice((byte[])msg.obj);
+                    break;
+                case READ:
+                    break;
+
+            }
+        }
+    }
 
     Messenger mMessenger = new Messenger(new Handler() {
         @Override
@@ -133,6 +156,10 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
         btn_green.setOnClickListener(this);
         btn_white.setOnClickListener(this);
 
+        mThread = new HandlerThread("DeviceThread");
+        mThread.start();
+        mDeviceHandler = new DeviceHandler(mThread.getLooper());
+
         mControlAll = findViewById(R.id.sw_single_or_both);
         mControlAll.setChecked(true);
         mControlAll.setShowText(true);
@@ -160,8 +187,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                 };
                 data[5] = (byte) ((i & 0x000000FF) >> 0);
 
-                writeToDevice(data);
+                Message msg = Message.obtain();
+                msg.what = WRITE;
+                msg.obj = data;
 
+                mDeviceHandler.sendMessage(msg);
 
 
 
@@ -272,6 +302,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
 
             mBTGattInst.setCharacteristicNotification(mWriteCharacteristic, true);
+            mBTGattInst.setCharacteristicNotification(mReadCharacteristic, true);
 
 
 
@@ -302,6 +333,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
+        Message msg = null;
         switch (view.getId()) {
             case R.id.btn_red:
                 if (null != mWriteCharacteristic) {
@@ -315,7 +347,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                             0x00
 
                     };
-                    writeToDevice(red);
+                    msg = Message.obtain();
+                    msg.what = WRITE;
+                    msg.obj = red;
+
+                    mDeviceHandler.sendMessage(msg);
 
                     if (mIsAll){
                         try {
@@ -324,7 +360,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         red[1] = 0x01;
-                        writeToDevice(red);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = red;
+
+                        mDeviceHandler.sendMessage(msg);
                     }
 
 
@@ -344,7 +384,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                             0x32
 
                     };
-                    writeToDevice(blue);
+                    msg = Message.obtain();
+                    msg.what = WRITE;
+                    msg.obj = blue;
+
+                    mDeviceHandler.sendMessage(msg);
 
                     if (mIsAll) {
                         try {
@@ -353,7 +397,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         blue[1] = 0x01;
-                        writeToDevice(blue);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = blue;
+
+                        mDeviceHandler.sendMessage(msg);
                     }
 
 
@@ -371,7 +419,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                             0x00
 
                     };
-                    writeToDevice(green);
+                    msg = Message.obtain();
+                    msg.what = WRITE;
+                    msg.obj = green;
+
+                    mDeviceHandler.sendMessage(msg);
 
                     if (mIsAll) {
                         try {
@@ -380,7 +432,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         green[1] = 0x01;
-                        writeToDevice(green);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = green;
+
+                        mDeviceHandler.sendMessage(msg);
                     }
 
 
@@ -398,7 +454,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                             0x32
 
                     };
-                    writeToDevice(white);
+                    msg = Message.obtain();
+                    msg.what = WRITE;
+                    msg.obj = white;
+
+                    mDeviceHandler.sendMessage(msg);
 
                     if (mIsAll) {
                         try {
@@ -407,7 +467,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         white[1] = 0x01;
-                        writeToDevice(white);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = white;
+
+                        mDeviceHandler.sendMessage(msg);
                     }
 
                 }
@@ -416,11 +480,19 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
             case R.id.btn_get_paired_nodes:
                 byte[] sensor_info = {
-                        0x00, 0x01, 0x02
+                        0x00, 0x00, 0x00, 0x02
                 };
-                //writeToDevice(sensor_info);
-                mReadCharacteristic.setValue(sensor_info);
-                mBTGattInst.readCharacteristic(mReadCharacteristic);
+                msg = Message.obtain();
+                msg.what = WRITE;
+                msg.obj = sensor_info;
+
+                mDeviceHandler.sendMessage(msg);
+
+
+
+
+                //mReadCharacteristic.setValue(sensor_info);
+                //mBTGattInst.readCharacteristic(mReadCharacteristic);
 
                 break;
             case R.id.btn_Turn_on_all_lights:
@@ -438,7 +510,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                         };
 
 
-                        writeToDevice(yellow_all);
+                    msg = Message.obtain();
+                    msg.what = WRITE;
+                    msg.obj = yellow_all;
+
+                    mDeviceHandler.sendMessage(msg);
 
                         try {
                             Thread.sleep(WRITE_DELAY);
@@ -446,7 +522,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         yellow_all[1] = 0x01;
-                        writeToDevice(yellow_all);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = yellow_all;
+
+                        mDeviceHandler.sendMessage(msg);
                         mSwithAllLightsBtn.setText("OFF ALL");
 
                 }
@@ -460,8 +540,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         };
 
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = yellow_all;
 
-                        writeToDevice(yellow_all);
+                        mDeviceHandler.sendMessage(msg);
 
                         try {
                             Thread.sleep(WRITE_DELAY);
@@ -469,7 +552,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                         }
                         yellow_all[1] = 0x01;
-                        writeToDevice(yellow_all);
+                        msg = Message.obtain();
+                        msg.what = WRITE;
+                        msg.obj = yellow_all;
+
+                        mDeviceHandler.sendMessage(msg);
                         mSwithAllLightsBtn.setText("ON ALL");
 
                     }
