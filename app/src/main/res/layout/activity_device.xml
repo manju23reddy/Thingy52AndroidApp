@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="5dip"
+    tools:context="com.harman.blemeshmobile.DeviceActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:elevation="8dip"
+        android:padding="5dip"
+        android:background="#eeeeee">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtv_name"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_margin="5dip"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtv_name"
+            android:textSize="17sp"
+            android:id="@+id/txtv_mac_addr"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtv_name"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/txtv_conn_status"
+            android:textSize="17sp"
+            android:gravity="center"/>
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtv_mac_addr"
+            android:id="@+id/sw_single_or_both"
+            android:textOn="All Nodes"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:textOff="Single Node"/>
+
+        <LinearLayout
+            android:layout_margin="2dip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sw_single_or_both"
+            android:visibility="gone"
+            android:id="@+id/lyt_color"
+            android:orientation="horizontal">
+
+            <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+                android:layout_weight="1"
+            android:background="#ff0000"
+            android:text="RED"
+            android:layout_margin="2dip"
+            android:id="@+id/btn_red"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#0000ff"
+                android:text="BLUE"
+                android:layout_margin="2dip"
+                android:id="@+id/btn_blue"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#00ff00"
+                android:text="GREEN"
+                android:layout_margin="2dip"
+                android:id="@+id/btn_green"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#ffffff"
+                android:text="WHITE"
+                android:layout_margin="2dip"
+                android:id="@+id/btn_white"/>
+
+        </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerHorizontal="true"
+            android:text="Get Sensor Info"
+            android:enabled="false"
+            android:id="@+id/btn_get_paired_nodes"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerHorizontal="true"
+            android:text="ON ALL"
+            android:enabled="false"
+            android:id="@+id/btn_Turn_on_all_lights"/>
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rcv_paired_nodes"/>
+
+    </ScrollView>
+
+
+
+</LinearLayout>
